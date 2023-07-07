@@ -15,7 +15,7 @@ Console.WriteLine("Start...");
 string pattern = @"@\|inquiry:\d+\|";
 Main:
 {
-    Console.WriteLine("Fetching data...");
+    Console.WriteLine($"{DateTime.Now}: Fetching data...");
     try
     {
         using var db = new DBTools(config["ConnectionString"]);
@@ -54,7 +54,7 @@ Main:
 
                 db.ClearParameter();
                 db.AddInParameter("@TextBlastId", textBlast.ID);
-                var individuals = await db.ExecuteReaderListStringAsync<TextBlastIndividualSending>("SELECT * " +
+                var individuals = await db.ExecuteReaderListStringAsync<TextBlastIndividualSending>("SELECT TOP 5 * " +
                                                                                                     "FROM [TextBlastIndividualSending] " +
                                                                                                     "WHERE [TextBlastId] = @TextBlastId " +
                                                                                                     "   AND [StatusId] = 1");
@@ -114,7 +114,7 @@ Main:
                     "           AND [StatusId] = 1) = 0, 3, 1)" +
                     "   , [ModifiedBy] = -1" +
                     "   , [ModifiedDate] = GETDATE()" +
-                    "WHERE [ID] = @Id");
+                    "WHERE [ID] = @Id AND [TextBlastStatusID] = 2");
             }
             Console.WriteLine("Closing Messages...");
         }
@@ -132,7 +132,7 @@ static async Task<bool> SendMessage(IConfiguration config, string message, strin
         username = config["Username"]!,
         password = config["Password"]!,
         msisdn = number,
-        content = message,
+        content = message.Replace("\r", ""),
         shortcode_mask = config["ShortCodeMask"]!,
     };
 
